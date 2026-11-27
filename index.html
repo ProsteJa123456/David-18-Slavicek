@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>David je dospělý 🎉</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14082a;--coral:#ff5a4e;--lemon:#ffe14d;--mint:#3ef0c2;--paper:#fff8ec}
+*{box-sizing:border-box;margin:0}
+html{background:var(--ink)}
+html.disco{animation:hue 2s linear infinite}
+@keyframes hue{to{filter:hue-rotate(360deg)}}
+body{min-height:100vh;color:var(--paper);font-family:'Rubik',system-ui,sans-serif;overflow-x:hidden;
+ background:radial-gradient(circle at 20% 10%,#3a1470 0,transparent 45%),radial-gradient(circle at 85% 90%,#6a1b4d 0,transparent 40%),var(--ink)}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+section{min-height:100vh;min-height:100dvh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+section.on{display:flex}
+.hint{opacity:.7;margin-bottom:28px;font-size:1.05rem}
+
+/* velké tlačítko */
+#big{position:relative;width:min(70vw,42vh,380px);aspect-ratio:1;border:0;border-radius:50%;cursor:pointer;
+ font:inherit;font-family:'Bowlby One',Impact,sans-serif;font-size:clamp(1.4rem,min(6vw,4.5vh),2.6rem);line-height:1.1;color:var(--ink);
+ background:radial-gradient(circle at 35% 30%,#fff3a0,var(--lemon) 45%,#ffa31a);
+ box-shadow:0 14px 0 #b3590a,0 30px 60px rgba(255,90,78,.45);animation:pulse 1.6s ease-in-out infinite;transition:transform .1s,box-shadow .1s}
+#big:hover{filter:brightness(1.07)}
+#big:active{transform:translateY(12px);box-shadow:0 2px 0 #b3590a,0 10px 30px rgba(255,90,78,.45)}
+#big:focus-visible,.btn:focus-visible{outline:4px solid var(--mint);outline-offset:6px}
+@keyframes pulse{50%{transform:scale(1.05)}}
+#big.boom{animation:boom .6s forwards}
+@keyframes boom{to{transform:scale(4);opacity:0}}
+#big.shake{animation:shake .4s}
+@keyframes shake{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+/* oslava */
+#party h1{max-width:min(1100px,100%);font-family:'Bowlby One',Impact,sans-serif;font-weight:400;font-size:clamp(1.6rem,min(7vw,8vh),4.4rem);line-height:1.05;letter-spacing:.01em}
+#party h1 span{display:inline-block;opacity:0;transform:translateY(40px) rotate(-6deg);animation:pop .5s forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+#age{font-family:'Bowlby One',Impact,sans-serif;font-size:clamp(5rem,min(32vw,32vh),17rem);line-height:1;margin:.1em 0;cursor:pointer;user-select:none;
+ color:var(--lemon);text-shadow:6px 6px 0 var(--coral),12px 12px 0 rgba(0,0,0,.35)}
+#age.bump{animation:bump .4s}
+@keyframes bump{40%{transform:scale(1.15) rotate(-4deg)}}
+.sub{font-size:clamp(1.1rem,3vw,1.5rem);max-width:30ch;margin-bottom:28px;opacity:0;transition:opacity 1s}
+.btn{font:inherit;font-weight:600;font-size:1.15rem;padding:16px 34px;border:0;border-radius:999px;cursor:pointer;color:var(--ink);background:var(--mint);box-shadow:0 6px 0 #138a6d;transition:transform .1s}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #138a6d}
+.btn.hide{display:none}
+
+/* hra */
+#game{position:relative;padding:0;overflow:hidden;justify-content:flex-start;align-items:stretch}
+#court{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#hud{position:relative;z-index:5;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline;padding:18px clamp(16px,3vw,48px);font-family:'Bowlby One',Impact,sans-serif;font-size:clamp(1.2rem,2.2vw,2rem);pointer-events:none;text-align:left}
+#hud small{font:400 clamp(.85rem,1.2vw,1.1rem) 'Rubik',sans-serif;opacity:.75;flex-basis:100%}
+#reset{position:fixed;top:14px;right:14px;z-index:70;display:none;font-size:.95rem;padding:10px 18px;background:var(--coral);color:var(--paper);box-shadow:0 4px 0 #9c2a22}
+#reset:active{box-shadow:0 1px 0 #9c2a22}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,200%);background:var(--paper);color:var(--ink);padding:14px 22px;border-radius:14px;font-weight:600;z-index:60;transition:transform .4s;max-width:90vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+@media (min-width:900px){.btn{font-size:1.3rem;padding:18px 40px}#reset{font-size:1rem;padding:10px 20px;top:18px;right:22px}#toast{font-size:1.1rem}}
+@media (max-height:520px){.hint{margin-bottom:12px}.sub{margin-bottom:14px}}
+@media (hover:hover){.btn:hover{filter:brightness(1.08);transform:translateY(-2px)}.btn:active{transform:translateY(5px)}}
+@media (prefers-reduced-motion:reduce){#big{animation:none}html.disco{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<section id="intro" class="on">
+  <p class="hint">Davide, tohle je pro tebe. Jen jedna věc: je tu tlačítko.</p>
+  <button id="big" aria-label="Velké tlačítko">NEMAČKEJ<br>MĚ</button>
+</section>
+
+<section id="party">
+  <h1 id="title"></h1>
+  <div id="age" title="Klikej. Třeba se něco stane.">0</div>
+  <p class="sub" id="sub">Od teď můžeš všechno, co jsi do teď dělal stejně, jenom legálně.</p>
+  <button class="btn hide" id="toGame">Zahraj si minihru</button>
+</section>
+
+<section id="game">
+  <canvas id="court"></canvas>
+  <div id="hud"><span>Skóre: <b id="score">0</b></span><span>Nejlepší: <b id="best">0</b></span><small>Chyť míč, natáhni ho dozadu a pusť. Čistý koš = 2 body, přes obruč 1 bod.</small></div>
+</section>
+
+<button class="btn" id="reset">↺ Od začátku</button>
+
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), rnd=(a,b)=>a+Math.random()*(b-a);
+const COL=['#ff5a4e','#ffe14d','#3ef0c2','#ff8cf0','#6ab7ff','#fff8ec'];
+
+/* ---------- toast ---------- */
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),3200)}
+
+/* ---------- efekty (konfety + ohňostroj) ---------- */
+const cv=$('#fx'),cx=cv.getContext('2d');let P=[];
+function size(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio}
+addEventListener('resize',size);size();
+function confetti(x,y,n=120,spread=1){for(let i=0;i<n;i++){const a=rnd(0,Math.PI*2),s=rnd(3,13)*spread;
+ P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6,g:.25,r:rnd(4,9),c:COL[i%COL.length],life:rnd(90,170),rot:rnd(0,6),vr:rnd(-.3,.3),sq:1})}}
+function firework(x,y){const c=COL[Math.floor(rnd(0,COL.length))];for(let i=0;i<70;i++){const a=i/70*Math.PI*2,s=rnd(2,7);
+ P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,g:.06,r:3,c,life:rnd(50,80),rot:0,vr:0,sq:0})}}
+function emojiRain(list,n=40){for(let i=0;i<n;i++)setTimeout(()=>{const e=document.createElement('div');e.textContent=list[Math.floor(rnd(0,list.length))];
+ e.style.cssText=`position:fixed;top:-60px;left:${rnd(0,95)}vw;font-size:${rnd(28,60)}px;z-index:55;pointer-events:none;transition:transform ${rnd(2,4)}s linear`;
+ document.body.appendChild(e);requestAnimationFrame(()=>e.style.transform=`translateY(115vh) rotate(${rnd(-360,360)}deg)`);setTimeout(()=>e.remove(),4500)},i*70)}
+(function loop(){cx.clearRect(0,0,cv.width,cv.height);const d=devicePixelRatio;
+ P=P.filter(p=>p.life-->0);for(const p of P){p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.rot+=p.vr;
+  cx.globalAlpha=Math.min(1,p.life/30);cx.fillStyle=p.c;
+  if(p.sq){cx.save();cx.translate(p.x*d,p.y*d);cx.rotate(p.rot);cx.fillRect(-p.r*d,-p.r*d/2,p.r*2*d,p.r*d);cx.restore()}
+  else{cx.beginPath();cx.arc(p.x*d,p.y*d,p.r*d,0,7);cx.fill()}}
+ requestAnimationFrame(loop)})();
+function show(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');$('#reset').style.display=id==='#intro'?'none':'block'}
+
+/* ---------- velké tlačítko ---------- */
+let clicks=0;const big=$('#big');
+const teasers=['Opravdu to nedělej.','Hej, řekl jsem NE.','Jsi tvrdohlavý, to se ti bude v dospělosti hodit.','Ještě jednou a něco se stane…'];
+big.addEventListener('click',()=>{
+  if(clicks<teasers.length){toast(teasers[clicks]);big.classList.remove('shake');void big.offsetWidth;big.classList.add('shake');clicks++;return}
+  const r=big.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  big.classList.add('boom');confetti(x,y,200,1.3);firework(x,y);
+  setTimeout(()=>{show('#party');startParty()},500);
+});
+
+/* ---------- oslava ---------- */
+let iv;
+function startParty(){
+  const lines=['VŠECHNO NEJLEPŠÍ','K 18. NAROZENINÁM,','DAVIDE SLAVÍČKU!'];const t=$('#title');t.innerHTML='';let d=0;
+  lines.forEach(l=>{l.split(' ').forEach(w=>{const s=document.createElement('span');s.textContent=w+'\u00a0';s.style.animationDelay=(d+=.18)+'s';t.appendChild(s)})});
+  let n=0;clearInterval(iv);iv=setInterval(()=>{$('#age').textContent=++n;if(n>=18){clearInterval(iv);
+    $('#age').classList.add('bump');$('#sub').style.opacity=1;$('#toGame').classList.remove('hide');
+    for(let i=0;i<6;i++)setTimeout(()=>firework(rnd(100,innerWidth-100),rnd(80,innerHeight/2)),i*350);
+    confetti(innerWidth/2,innerHeight/2,250,1.5)}},110);
+}
+let ageClicks=0;
+$('#age').addEventListener('click',e=>{
+  const a=$('#age');a.classList.remove('bump');void a.offsetWidth;a.classList.add('bump');confetti(e.clientX,e.clientY,40);
+  ageClicks++;
+  if(ageClicks===18){emojiRain(['🎂','🍺','🪪','🚗','🎉','👑'],60);toast('18× kliknuto. Level „dospělý“ odemčen. Papíry ti nikdo nedá.')}
+});
+$('#toGame').addEventListener('click',()=>{show('#game');startGame()});
+
+/* ---------- minihra: basketbal ---------- */
+/* Hra běží ve „světových“ jednotkách a plátno se škáluje (S), takže vypadá stejně na mobilu i na velkém monitoru. */
+const gc=$('#court'),g=gc.getContext('2d');
+let W,H,S=1,WW,WH,dpr=1,ball,hoop,drag=null,score=0,best=0,miss=0,playing=false,raf,over=false;
+const G=.45,POWER=.15,MAXPULL=150,R=18;
+function gsize(){dpr=devicePixelRatio||1;W=gc.clientWidth;H=gc.clientHeight;gc.width=W*dpr;gc.height=H*dpr;
+  S=Math.min(Math.max(Math.min(H/650,W/520),.6),1.8);WW=W/S;WH=H/S}
+addEventListener('resize',()=>{if(playing){gsize();placeBall();newHoop()}});
+function placeBall(){ball={x:Math.min(110,WW*.16),y:WH-110,vx:0,vy:0,st:'ready',scored:false,touched:false,bounces:0}}
+function newHoop(){
+  const maxX=Math.min(WW-130,ball.x+620),minX=Math.min(maxX,ball.x+180);
+  const yMin=Math.max(130,WH*.25,ball.y-300),yMax=Math.max(yMin+10,Math.min(WH*.6,ball.y-120));
+  hoop={x:rnd(minX,maxX),y:rnd(yMin,yMax)};
+}
+function startGame(){
+  gsize();score=0;miss=0;over=false;$('#score').textContent=0;playing=true;placeBall();newHoop();cancelAnimationFrame(raf);tick();
+}
+function stopGame(){playing=false;cancelAnimationFrame(raf)}
+function aimVel(p){return{vx:(ball.x-p.x)*POWER,vy:(ball.y-p.y)*POWER}}
+function clampPull(x,y){let dx=x-ball.x,dy=y-ball.y;const d=Math.hypot(dx,dy);if(d>MAXPULL){dx*=MAXPULL/d;dy*=MAXPULL/d}return{x:ball.x+dx,y:ball.y+dy}}
+function pt(e){const r=gc.getBoundingClientRect();return{x:(e.clientX-r.left)/S,y:(e.clientY-r.top)/S}}
+gc.addEventListener('pointerdown',e=>{if(!playing||ball.st!=='ready')return;const p=pt(e);
+  if(Math.hypot(p.x-ball.x,p.y-ball.y)<75){drag=clampPull(p.x,p.y);gc.setPointerCapture(e.pointerId)}});
+gc.addEventListener('pointermove',e=>{if(drag){const p=pt(e);drag=clampPull(p.x,p.y)}});
+gc.addEventListener('pointerup',()=>{if(!drag)return;const pull=Math.hypot(drag.x-ball.x,drag.y-ball.y);
+  if(pull>20){const v=aimVel(drag);ball.vx=v.vx;ball.vy=v.vy;ball.st='fly'}drag=null});
+gc.addEventListener('pointercancel',()=>{drag=null});
+function bounceOff(px,py){const dx=ball.x-px,dy=ball.y-py,d=Math.hypot(dx,dy);
+  if(d<R+3&&d>0){const nx=dx/d,ny=dy/d,dot=ball.vx*nx+ball.vy*ny;ball.x=px+nx*(R+3);ball.y=py+ny*(R+3);
+    if(dot<0){ball.vx-=1.65*dot*nx;ball.vy-=1.65*dot*ny}ball.touched=true}}
+function next(delay){over=true;setTimeout(()=>{if(!playing)return;placeBall();over=false},delay)}
+function update(){
+  if(ball.st!=='fly')return;const py=ball.y;
+  ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=G;
+  bounceOff(hoop.x-50,hoop.y);bounceOff(hoop.x+50,hoop.y);
+  const bx=hoop.x+58;
+  if(ball.x+R>bx&&ball.x-R<bx+10&&ball.y>hoop.y-95&&ball.y<hoop.y+12&&ball.vx>0){ball.x=bx-R;ball.vx*=-.55;ball.touched=true}
+  if(ball.x<R){ball.x=R;ball.vx*=-.6}if(ball.x>WW-R){ball.x=WW-R;ball.vx*=-.6}
+  if(!ball.scored&&py<hoop.y&&ball.y>=hoop.y&&ball.vy>0&&ball.x>hoop.x-48&&ball.x<hoop.x+48){
+    ball.scored=true;const swish=!ball.touched,add=swish?2:1;score+=add;miss=0;
+    $('#score').textContent=score;if(score>best){best=score;$('#best').textContent=best}
+    confetti(hoop.x*S,hoop.y*S,swish?90:45,.8);if(swish)toast('🔥 Čistý koš! +2');
+    if(score>=18&&score-add<18){toast('🎉 18 bodů! Dospělý střelec.');for(let i=0;i<6;i++)setTimeout(()=>firework(rnd(80,W-80),rnd(80,H/2)),i*300)}
+    setTimeout(()=>{if(playing)newHoop()},650);next(900);
+  }
+  const fl=WH-24;
+  if(ball.y+R>fl){ball.y=fl-R;ball.vy*=-.55;ball.vx*=.82;ball.bounces++;
+    if(!ball.scored&&!over&&(ball.bounces>=2||Math.abs(ball.vy)<2)){miss++;if(miss===5)toast('Trénink dělá mistra. Pozor na sílu.');next(500)}}
+}
+function drawHoop(){
+  const x=hoop.x,y=hoop.y;
+  g.fillStyle='#fff8ec';g.fillRect(x+56,y-95,12,107);g.fillStyle='#ff5a4e';g.fillRect(x+56,y-20,12,6);
+  g.strokeStyle='rgba(255,248,236,.55)';g.lineWidth=2;g.beginPath();
+  for(let i=0;i<=5;i++){g.moveTo(x-50+i*20,y);g.lineTo(x-34+i*13.6,y+50)}
+  g.moveTo(x-50,y+17);g.lineTo(x+50,y+17);g.moveTo(x-42,y+34);g.lineTo(x+42,y+34);g.stroke();
+}
+function drawRim(){g.strokeStyle='#ff5a4e';g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(hoop.x-50,hoop.y);g.lineTo(hoop.x+50,hoop.y);g.stroke()}
+function drawBall(x,y){
+  const gr=g.createRadialGradient(x-6,y-6,2,x,y,R);gr.addColorStop(0,'#ffb347');gr.addColorStop(1,'#d9560b');
+  g.fillStyle=gr;g.beginPath();g.arc(x,y,R,0,7);g.fill();
+  g.strokeStyle='rgba(60,20,0,.7)';g.lineWidth=1.6;g.beginPath();g.arc(x,y,R,0,7);g.moveTo(x-R,y);g.lineTo(x+R,y);g.moveTo(x,y-R);g.lineTo(x,y+R);g.stroke();
+}
+function tick(){
+  if(!playing)return;
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.setTransform(dpr*S,0,0,dpr*S,0,0);
+  g.fillStyle='rgba(255,248,236,.12)';g.fillRect(0,WH-24,WW,2);
+  update();drawHoop();
+  if(drag){
+    const v=aimVel(drag);let x=ball.x,y=ball.y,vx=v.vx,vy=v.vy;g.fillStyle='rgba(255,248,236,.8)';
+    for(let i=0;i<30;i++){x+=vx;y+=vy;vy+=G;if(i%3===2){g.beginPath();g.arc(x,y,Math.max(2,5-i/8),0,7);g.fill()}}
+    g.strokeStyle='#ffe14d';g.lineWidth=3;g.beginPath();g.moveTo(ball.x-14,ball.y);g.lineTo(drag.x,drag.y);g.moveTo(ball.x+14,ball.y);g.lineTo(drag.x,drag.y);g.stroke();
+    drawBall(drag.x,drag.y);
+  } else drawBall(ball.x,ball.y);
+  drawRim();raf=requestAnimationFrame(tick);
+}
+
+/* ---------- reset ---------- */
+$('#reset').addEventListener('click',()=>{
+  clearInterval(iv);stopGame();clicks=0;ageClicks=0;best=0;$('#best').textContent=0;P=[];
+  big.className='';$('#age').textContent='0';$('#age').classList.remove('bump');
+  $('#sub').style.opacity=0;$('#toGame').classList.add('hide');$('#title').innerHTML='';
+  document.documentElement.classList.remove('disco');show('#intro');
+});
+
+/* ---------- easter eggs ---------- */
+const K=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let ki=0,typed='';
+addEventListener('keydown',e=>{
+  ki=(e.key===K[ki])?ki+1:(e.key===K[0]?1:0);
+  if(ki===K.length){ki=0;document.documentElement.classList.toggle('disco');toast('🪩 Konami kód! Diskotéka zapnuta (znovu vypne).');emojiRain(['🪩','🎶','✨'],30)}
+  if(e.key.length===1){typed=(typed+e.key.toLowerCase()).slice(-8);
+    if(typed.endsWith('pivo')){toast('🍺 Pivo? Od dneška už legálně. Ale zodpovědně.');emojiRain(['🍺'],25);typed=''}
+    if(typed.endsWith('david')){toast('👋 Ahoj Davide. Jo, to jsi ty.');confetti(innerWidth/2,innerHeight/2,100);typed=''}
+    if(typed.endsWith('bomba')){toast('💥 BUM.');for(let i=0;i<8;i++)firework(rnd(50,innerWidth-50),rnd(50,innerHeight-200));typed=''}}
+});
+document.title.length;console.log('%cAhoj Davide! 👀 Zkus Konami kód, napsat „pivo“, „david“ nebo „bomba“.','font-size:16px;color:#ffe14d;background:#14082a;padding:8px');
+</script>
+</body>
+</html>
